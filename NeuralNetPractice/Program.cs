@@ -69,64 +69,72 @@ namespace NeuralNetPractice
             }
             return new Polynomial(SystemsOfEquationsSolver(rhs, y));
         }
+        static bool OutDated(string directory) =>
+            !System.IO.File.Exists(directory) || (DateTime.Now - System.IO.File.GetLastWriteTime(directory)).TotalDays >= 1;
         static void Main(string[] args)
         {
             const string POST_PROCESS_SAVE_LOCATION = "PostProcessData\\";
 
-            Console.WriteLine("Starting Import");
-            var databank = DataInterface.GetDataCollection();
-            Console.WriteLine("Import Complete");
-            Console.WriteLine("Preprocessing");
-            //Console.ReadLine();
-            //Databank databank = Databank.LoadDatabankCSV("InputData","Date",(string rawDate) =>
-            //{
-            //    var elements = rawDate.Split('-');
-            //    DateTime date = new DateTime(int.Parse(elements[0]), int.Parse(elements[1]), int.Parse(elements[2]));
-            //    return (int)(date.DayOfYear + (date.Year - 1950) * 260);
-            //});
-            var dateColumn = databank.DataTableCollection[0]["Date"];
-            foreach (var t in databank.DataTableCollection)
+            if (OutDated(POST_PROCESS_SAVE_LOCATION + "testingLabelSet.csv"))
             {
-                t.RemoveColumn("High");
-                t.RemoveColumn("Low");
-                t.RemoveColumn("Volume");
-                t.RemoveColumn("Date");
-            }
-            DataTable table = databank.ToDataTable();
-            for (int i = 0; i < table.ColumnCount; i++)
-                Console.WriteLine("Name: {0}, Starting Index: {1}, Ending Index: {2}", table.Columns[i].Name, table.Columns[i].FirstDay, table.Columns[i].LastDay);
-            //table = table.Interlace(100);
-            table.AddColumn(dateColumn);
-            Console.WriteLine("LastDate: " + table["Date"][table["Date"].Length - 1]);
-            table = table.Synchronize();
-            table.AddColumn((string[] strInput, DateTime dateTime) => dateTime.DayOfYear.ToString(), new string[0], "DayOfYear");
-            var label = table["TXN.Close"].BuildDifferentialLabel((string current, string future) =>
-            {
-                return future;
+                Console.WriteLine("Starting Import");
+                var databank = DataInterface.GetDataCollection();
+                Console.WriteLine("Import Complete");
+                Console.WriteLine("Preprocessing");
+                //Console.ReadLine();
+                //Databank databank = Databank.LoadDatabankCSV("InputData","Date",(string rawDate) =>
+                //{
+                //    var elements = rawDate.Split('-');
+                //    DateTime date = new DateTime(int.Parse(elements[0]), int.Parse(elements[1]), int.Parse(elements[2]));
+                //    return (int)(date.DayOfYear + (date.Year - 1950) * 260);
+                //});
+                var dateColumn = databank.DataTableCollection[0]["Date"];
+                foreach (var t in databank.DataTableCollection)
+                {
+                    t.RemoveColumn("High");
+                    t.RemoveColumn("Low");
+                    t.RemoveColumn("Volume");
+                    t.RemoveColumn("Date");
+                }
+                DataTable table = databank.ToDataTable();
+                for (int i = 0; i < table.ColumnCount; i++)
+                    Console.WriteLine("Name: {0}, Starting Index: {1}, Ending Index: {2}", table.Columns[i].Name, table.Columns[i].FirstDay, table.Columns[i].LastDay);
+                //table = table.Interlace(100);
+                var latestDate = table[0].LastDay;
+                table.Select(latestDate, latestDate).Save(POST_PROCESS_SAVE_LOCATION + "latest.csv");
+                table.AddColumn(dateColumn);
+                Console.WriteLine("LastDate: " + table["Date"][table["Date"].Length - 1]);
+                table = table.Synchronize();
+                table.AddColumn((string[] strInput, DateTime dateTime) => dateTime.DayOfYear.ToString(), new string[0], "DayOfYear");
+                var label = table["TXN.Close"].BuildDifferentialLabel((string current, string future) =>
+                {
+                    return future;
                 //return ((Math.Sign(double.Parse(future) - double.Parse(current)) + 1) / 2).ToString();
-            }, 1);
-            label.Name = "label";
-            table.AddColumn(label);
-            table = table.Synchronize();
-            label = table["label"];
-            table.RemoveColumn("label");
-            const int RANDOM_SEED = 165113;
-            table = table.Select(label.FirstDay, label.LastDay);
+                }, 1);
+                label.Name = "label";
+                table.AddColumn(label);
+                table = table.Synchronize();
+                label = table["label"];
+                table.RemoveColumn("label");
+                const int RANDOM_SEED = 165113;
+                table = table.Select(label.FirstDay, label.LastDay);
 
-            table.Splice(out DataTable trainingSet, out DataTable testingSet, 0.2, new Random(RANDOM_SEED));
+                table.Splice(out DataTable trainingSet, out DataTable testingSet, 0.8, new Random(RANDOM_SEED));
 
-            DataTable labelTable = new DataTable();
-            labelTable.Columns.Add(label);
+                DataTable labelTable = new DataTable();
+                labelTable.Columns.Add(label);
+                labelTable.AddColumn((string[] str, DateTime dt) => dt.ToString(), new string[0], "DateTime");
 
-            labelTable.Splice(out DataTable trainingLabelSet, out DataTable testingLabelSet, 0.2, new Random(RANDOM_SEED));
+                labelTable.Splice(out DataTable trainingLabelSet, out DataTable testingLabelSet, 0.8, new Random(RANDOM_SEED));
 
-            Console.WriteLine("Label Index: {0}, Ending Index: {1}", label.FirstDay, label.LastDay);
+                Console.WriteLine("Label Index: {0}, Ending Index: {1}", label.FirstDay, label.LastDay);
 
-            testingSet.Save(POST_PROCESS_SAVE_LOCATION + "testingSet.csv");
-            trainingSet.Save(POST_PROCESS_SAVE_LOCATION + "trainingSet.csv");
-            testingLabelSet.Save(POST_PROCESS_SAVE_LOCATION + "testingLabelSet.csv");
-            labelTable.Save(POST_PROCESS_SAVE_LOCATION + "trainingLabelSet.csv");
-            Console.WriteLine("Preprocessing complete");
+                testingSet.Save(POST_PROCESS_SAVE_LOCATION + "testingSet.csv");
+                trainingSet.Save(POST_PROCESS_SAVE_LOCATION + "trainingSet.csv");
+                testingLabelSet.Save(POST_PROCESS_SAVE_LOCATION + "testingLabelSet.csv");
+                trainingLabelSet.Save(POST_PROCESS_SAVE_LOCATION + "trainingLabelSet.csv");
+                Console.WriteLine("Preprocessing complete");
+            }
             Console.WriteLine(NeuralNetwork.Run());
             Console.WriteLine("Complete.");
             Console.ReadLine();

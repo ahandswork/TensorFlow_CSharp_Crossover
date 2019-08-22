@@ -57,9 +57,10 @@ namespace NeuralNetPractice
         {
             DataColumn dc = new DataColumn();
             dc.Name = Name;
-            var data = Content.Where((KeyValuePair<DateTime,string> pair) => { return startDate <= pair.Key && pair.Key <= endDate; });
-            foreach (var pair in data)
-                dc.Content.Add(pair.Key, pair.Value);
+            var last = Content.Last();
+            foreach (var pair in Content)
+                if(startDate <= pair.Key && pair.Key <= endDate)
+                    dc.Content.Add(pair.Key, pair.Value);
             return dc;
         }
         //add
@@ -117,16 +118,17 @@ namespace NeuralNetPractice
         //extrapolate
         public DataColumn BuildDifferentialLabel(Func<string, string, string> f, int recordSeperation)
         {
+            recordSeperation *= -1;
             DataColumn d = new DataColumn();
             d.Content = new Dictionary<DateTime, string>(Length - recordSeperation);
             d.Name = "Delta-" + Name;
-            for (DateTime i = FirstDay; i <= LastDay; i = i.AddDays(1))
+            foreach (var day in Keys)
             {
-                if (Content.Keys.Contains(i))
+                if (Content.Keys.Contains(day))
                 {
-                    var nextDay = i.AddDays(recordSeperation);
+                    var nextDay = day.AddDays(recordSeperation);
                     if (Content.Keys.Contains(nextDay))
-                        d[i] = f(this[i], this[nextDay]);
+                        d[day] = f(this[day], this[nextDay]);
                 }
             }
             return d;
