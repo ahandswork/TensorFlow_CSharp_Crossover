@@ -101,9 +101,8 @@ namespace NeuralNetPractice
                     Console.WriteLine("Name: {0}, Starting Index: {1}, Ending Index: {2}", table.Columns[i].Name, table.Columns[i].FirstDay, table.Columns[i].LastDay);
                 //table = table.Interlace(100);
                 var latestDate = table[0].LastDay;
-                table.Select(latestDate, latestDate).Save(POST_PROCESS_SAVE_LOCATION + "latest.csv");
-                table.AddColumn(dateColumn);
-                Console.WriteLine("LastDate: " + table["Date"][table["Date"].Length - 1]);
+                //table.AddColumn(dateColumn);
+                //Console.WriteLine("LastDate: " + table["Date"][table["Date"].Length - 1]);
                 table = table.Synchronize();
                 table.AddColumn((string[] strInput, DateTime dateTime) => dateTime.DayOfYear.ToString(), new string[0], "DayOfYear");
                 var label = table["TXN.Close"].BuildDifferentialLabel((string current, string future) =>
@@ -114,16 +113,19 @@ namespace NeuralNetPractice
                 label.Name = "label";
                 table.AddColumn(label);
                 table = table.Synchronize();
+
                 label = table["label"];
                 table.RemoveColumn("label");
                 const int RANDOM_SEED = 165113;
                 table = table.Select(label.FirstDay, label.LastDay);
 
+                table.Select(latestDate, latestDate).Save(POST_PROCESS_SAVE_LOCATION + "latest.csv");
+
                 table.Splice(out DataTable trainingSet, out DataTable testingSet, 0.8, new Random(RANDOM_SEED));
 
                 DataTable labelTable = new DataTable();
                 labelTable.Columns.Add(label);
-                labelTable.AddColumn((string[] str, DateTime dt) => dt.ToString(), new string[0], "DateTime");
+                //labelTable.AddColumn((string[] str, DateTime dt) => dt.ToString(), new string[0], "DateTime");
 
                 labelTable.Splice(out DataTable trainingLabelSet, out DataTable testingLabelSet, 0.8, new Random(RANDOM_SEED));
 
@@ -135,9 +137,43 @@ namespace NeuralNetPractice
                 trainingLabelSet.Save(POST_PROCESS_SAVE_LOCATION + "trainingLabelSet.csv");
                 Console.WriteLine("Preprocessing complete");
             }
-            Console.WriteLine(NeuralNetwork.Run());
+            switch(ShowDialog("Which would you like to do?", new string[] { "Train network", "Test Network", "Predict using Network" }))
+            {
+                case 0:
+                    Console.WriteLine(NeuralNetwork.Train());
+                    break;
+                case 1:
+                    Console.WriteLine(NeuralNetwork.Test());
+                    break;
+                case 2:
+                    Console.WriteLine(NeuralNetwork.PredictFuture());
+                    break;
+            }
             Console.WriteLine("Complete.");
             Console.ReadLine();
+        }
+        static int ShowDialog(string prompt, string[] options)
+        {
+            Console.WriteLine("\n" + prompt);
+            for(int i = 0; i < options.Length; i++)
+            {
+                Console.WriteLine("    {0}: {1}", i, options[i]);
+            }
+            if (int.TryParse(Console.ReadLine(), out int output))
+            {
+                if (output >= 0 && output < options.Length)
+                    return output;
+                else
+                {
+                    Console.WriteLine("Error- value entered out of range.");
+                    return ShowDialog(prompt, options);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Error- value entered not an integer.");
+                return ShowDialog(prompt, options);
+            }
         }
         /*
         static string GetString(double[] array)

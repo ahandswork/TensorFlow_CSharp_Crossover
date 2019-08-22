@@ -10,16 +10,14 @@ namespace NeuralNetPractice
 {
     class NeuralNetwork
     {
-        public static string Run()
-        {
-            //return run_cmd("cd \"c:\\Repos\\TensorFlowTest\"; ${env:PYTHONIOENCODING}='UTF-8'; ${env:PYTHONUNBUFFERED}='1'; & \"c:\\Repos\\TensorFlowTest\\.venv\\Scripts\\python.exe\" \"c:\\Users\\Boys64Bit\\.vscode\\extensions\\ms-python.python-2019.8.29288\\pythonFiles\\ptvsd_launcher.py\" '--default' '--client' '--host' 'localhost' '--port' '24805' \"c:\\Repos\\TensorFlowTest\\stockAnalystPredictor.py\"", "");
-            return run_cmd("\"stockAnalystPredictorV2.py\"", "");
-
-        }
+        public static string Train() => run_cmd("\"networkTrainer.py\"", "");
+        public static string Test() => run_cmd("\"networkTester.py\"", "");
+        public static string PredictFuture() => run_cmd("\"networkPredict.py\"", "");
         static string run_cmd(string cmd, string args)
         {
             ProcessStartInfo start = new ProcessStartInfo();
-            start.FileName = @"C:\Repos\TensorFlowTest\.venv\Scripts\python.exe";
+            //start.FileName = @"C:\Repos\TensorFlowTest\.venv\Scripts\python.exe";
+            start.FileName = "python";
             start.Arguments = string.Format("\"{0}\" \"{1}\"", cmd, args);
             start.UseShellExecute = false;// Do not use OS shell
             start.CreateNoWindow = false; // We don't need new window
