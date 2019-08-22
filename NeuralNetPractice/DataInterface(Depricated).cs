@@ -62,7 +62,7 @@
 //            ServicePointManager.Expect100Continue = true;
 //            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 //            using (var wc = new System.Net.WebClient())
-//                json = wc.DownloadString("https://api.worldtradingdata.com/api/v1/history?symbol=" + symbol + "&sort=newest&api_token=DqmZQ40MRT67vCkbMUTjUTzBqqrC1PiRMesLYOQP2jZU9tt3qSsIMwt6OaxV");
+//                json = wc.DownloadString("https://api.worldtradingdata.com/api/v1/history?symbol=" + symbol + token);
 
 //            int startingIndex = Program.SerializeDate(start);
 //            int length = Program.SerializeDate(end) - startingIndex + 1;
