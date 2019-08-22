@@ -99,7 +99,7 @@ namespace NeuralNetPractice
                 DataTable table = databank.ToDataTable();
                 for (int i = 0; i < table.ColumnCount; i++)
                     Console.WriteLine("Name: {0}, Starting Index: {1}, Ending Index: {2}", table.Columns[i].Name, table.Columns[i].FirstDay, table.Columns[i].LastDay);
-                //table = table.Interlace(100);
+                table = table.Interlace(2,true);
                 var latestDate = table[0].LastDay;
                 //table.AddColumn(dateColumn);
                 //Console.WriteLine("LastDate: " + table["Date"][table["Date"].Length - 1]);

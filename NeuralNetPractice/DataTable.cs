@@ -138,12 +138,12 @@ namespace NeuralNetPractice
         /// </summary>
         /// <param name="raw"></param>
         /// <returns></returns>
-        public DataTable Interlace(int multiplier)
+        public DataTable Interlace(int multiplier, bool skipWeekends)
         {
             DataTable dataTable = new DataTable();
             foreach (var column in Columns)
                 for (int i = 0; i <= multiplier; i++) {
-                    var dupe = column.ShiftDays(i);
+                    var dupe = column.ShiftDays(i, skipWeekends);
                     if(i != 0)
                         dupe.Name += i.ToString();
                     dataTable.Columns.Add(dupe);

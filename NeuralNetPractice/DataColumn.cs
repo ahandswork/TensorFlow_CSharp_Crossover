@@ -108,11 +108,24 @@ namespace NeuralNetPractice
                 dictionary.Add(pair.Key.AddDays(0), pair.Value);
             return new DataColumn(Name, dictionary);
         }
-        public DataColumn ShiftDays(int days)
+        public DataColumn ShiftDays(int days, bool skipWeekends)
         {
             DataColumn dataColumn = new DataColumn(Name, new Dictionary<DateTime, string>());
-            foreach (var value in Content)
-                dataColumn.Content.Add(value.Key.AddDays(days), value.Value);
+            if (skipWeekends)
+            {
+                foreach (var value in Content)
+                {
+                    var newDay = value.Key.AddDays(days);
+                    if (newDay.DayOfWeek == DayOfWeek.Saturday || newDay.DayOfWeek == DayOfWeek.Sunday)
+                        newDay.AddDays(2);
+                    dataColumn.Content.Add(newDay, value.Value);
+                }
+            }
+            else {
+
+                foreach (var value in Content)
+                    dataColumn.Content.Add(value.Key.AddDays(days), value.Value);
+            }
             return dataColumn;
         }
         //extrapolate
