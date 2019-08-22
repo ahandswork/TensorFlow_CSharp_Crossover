@@ -18,9 +18,6 @@
 //{
 //    class RemoteDataManager
 //    {
-//        const string SPREADSHEET_ID = "1By6PibLk0hOc64KH3HinvkScWCbI14KXzEHhfjwfxoQ";
-//        const string CLIENT_ID = "97955334181-4q9a1aso41rr7jile941nepkkstvet3t.apps.googleusercontent.com";
-//        const string CLIENT_SECRET = "yGfQqDHTc9O6oX8tR1wUzDxR";
 
 //        static string[] Scopes = { SheetsService.Scope.Spreadsheets };
 //        static string ApplicationName = "Invester Data Collector";
