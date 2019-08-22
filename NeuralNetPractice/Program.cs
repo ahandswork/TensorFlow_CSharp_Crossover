@@ -140,7 +140,8 @@ namespace NeuralNetPractice
             switch(ShowDialog("Which would you like to do?", new string[] { "Train network", "Test Network", "Predict using Network" }))
             {
                 case 0:
-                    Console.WriteLine(NeuralNetwork.Train());
+                    Console.WriteLine("How many epochs would you like?");
+                    Console.WriteLine(NeuralNetwork.Train(GetInteger(0,1000*1000*1000)));
                     break;
                 case 1:
                     Console.WriteLine(NeuralNetwork.Test());
@@ -159,20 +160,25 @@ namespace NeuralNetPractice
             {
                 Console.WriteLine("    {0}: {1}", i, options[i]);
             }
+            return GetInteger(0, options.Length);
+        }
+        static int GetInteger(int min, int max)
+        {
+            Console.WriteLine("Please Enter an integer in the following range: [{0},{1}).", min, max);
             if (int.TryParse(Console.ReadLine(), out int output))
             {
-                if (output >= 0 && output < options.Length)
+                if (min >= 0 && output < max)
                     return output;
                 else
                 {
                     Console.WriteLine("Error- value entered out of range.");
-                    return ShowDialog(prompt, options);
+                    return GetInteger(min, max);
                 }
             }
             else
             {
                 Console.WriteLine("Error- value entered not an integer.");
-                return ShowDialog(prompt, options);
+                return GetInteger(min, max);
             }
         }
         /*

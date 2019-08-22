@@ -10,6 +10,9 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 
+import sys
+EPOCHS = int(sys.argv[1])
+
 MODEL_SAVE_LOCATION = "Models\main_model"
 CHECKPOINT_SAVE_LOCATION = "Models\checkpoint_model"
 
@@ -59,8 +62,6 @@ model.summary()
 example_batch = trainingSet[:10]
 example_result = model.predict(example_batch)
 example_result
-
-EPOCHS = 10
 
 #training the model
 # Display training progress by printing a single dot for each completed epoch
