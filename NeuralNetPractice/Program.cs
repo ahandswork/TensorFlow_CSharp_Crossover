@@ -14,13 +14,6 @@ namespace NeuralNetPractice
             var elements = rawDate.Split('-');
             return new DateTime(int.Parse(elements[0]), int.Parse(elements[1]), int.Parse(elements[2]));
         }
-        public static DateTime DeserializeDate(string rawDate) => DeserializeDate(int.Parse(rawDate));
-        public static DateTime DeserializeDate(int rawDate)
-        {
-            var date = new DateTime(rawDate / 260, 0, 0);
-            date.AddDays(rawDate % 260);
-            return date;
-        }
         static long DeterminantSolver(long[,] matrix)
         {
             if (matrix.GetLength(0) == 2 && matrix.GetLength(1) == 2)
@@ -112,6 +105,11 @@ namespace NeuralNetPractice
                 return future;
                 //return ((Math.Sign(double.Parse(future) - double.Parse(current)) + 1) / 2).ToString();
             }, 1);
+            label.Name = "label";
+            table.AddColumn(label);
+            table = table.Synchronize();
+            label = table["label"];
+            table.RemoveColumn("label");
             const int RANDOM_SEED = 165113;
             table = table.Select(label.FirstDay, label.LastDay);
 

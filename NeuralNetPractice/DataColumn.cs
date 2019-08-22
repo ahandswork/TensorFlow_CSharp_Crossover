@@ -63,6 +63,7 @@ namespace NeuralNetPractice
             return dc;
         }
         //add
+        public void Add(DateTime key, string value) => Content.Add(key,value);
         //there cannot be gaps between "a" and "b"
         public static DataColumn Merge(DataColumn a, DataColumn b) =>
             Merge(a, b, a.Name == b.Name ? a.Name : ("Merge(" + a.Name + ", " + b.Name + ")"));
@@ -119,12 +120,14 @@ namespace NeuralNetPractice
             DataColumn d = new DataColumn();
             d.Content = new Dictionary<DateTime, string>(Length - recordSeperation);
             d.Name = "Delta-" + Name;
-            var endDay = FirstDay.AddDays(d.Length);
-            for (DateTime i = FirstDay; i <= endDay; i = i.AddDays(1))
+            for (DateTime i = FirstDay; i <= LastDay; i = i.AddDays(1))
             {
-                var nextDay = i.AddDays(recordSeperation);
-                if(Content.Keys.Contains(nextDay))
-                    d[i] = f(this[i], this[nextDay]);
+                if (Content.Keys.Contains(i))
+                {
+                    var nextDay = i.AddDays(recordSeperation);
+                    if (Content.Keys.Contains(nextDay))
+                        d[i] = f(this[i], this[nextDay]);
+                }
             }
             return d;
         }

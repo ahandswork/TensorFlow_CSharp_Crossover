@@ -17,7 +17,7 @@ namespace NeuralNetPractice
                 "ADI",
                 "AMAT",
                 "CSCO",
-                "CSIOY",
+                //"CSIOY",
                 "GOOG",
                 "INTC",
                 "LRCX",

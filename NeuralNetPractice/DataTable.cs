@@ -94,7 +94,7 @@ namespace NeuralNetPractice
                 lines[0] += ',' + Columns[i].Name;
                 for (int j = 1; j < lines.Length; j++)
                 {
-                    lines[j] += ',' + Columns[i][j];
+                    lines[j] += ',' + Columns[i][j - 1];
                 }
             }
             for (int i = 0; i < lines.Length; i++)
@@ -175,24 +175,23 @@ namespace NeuralNetPractice
             {
                 if (Columns[i].FirstDay > start)
                     start = Columns[i].FirstDay;
-                if (Columns[i].LastDay > end) 
+                if (Columns[i].LastDay < end) 
                     end = Columns[i].LastDay;
             }
-            //removing all before start and after end
-            for (int k = 0; k < ColumnCount; k++)
-                newTable.AddColumn(Columns[k].Select(start, end));
-            foreach (var day in newTable[0].Keys)
+            foreach (var column in Columns)
+                newTable.AddColumn(new DataColumn(column.Name));
+            foreach (var day in Columns[0].Keys)
             {
                 bool rowComplete = true;
                 for (int j = 0; j < ColumnCount; j++)
-                    if (!newTable[j].Keys.Contains(day))
+                    if (!Columns[j].Keys.Contains(day))
                     {
                         rowComplete = false;
                         break;
                     }
-                if (!rowComplete)
-                    foreach (var column in newTable.Columns)
-                        column.Remove(day);
+                if (rowComplete)
+                    for (int i = 0; i < ColumnCount; i++)
+                        newTable[i].Add(day,Columns[i][day]);
                         
             }
             newTable.DebugVerifySynced();
@@ -202,6 +201,9 @@ namespace NeuralNetPractice
         {
             if (Program.DEBUG)
             {
+                foreach (var column in Columns)
+                    if (column.Length != Columns[0].Length)
+                        throw new Exception("Error DataTable not synced becuase column lengths are inconsistant.");
                 foreach(var key in Columns[0].Keys)
                     for (int j = 1; j < Columns.Count; j++)
                         if (!Columns[j].Keys.Contains(key))
@@ -265,8 +267,8 @@ namespace NeuralNetPractice
             for (int i = 0; i < sizeB; i++)
             {
                 int index = ran.Next(0, aKeys.Count);
-                bKeys.Add(aKeys[i]);
-                aKeys.RemoveAt(i);
+                bKeys.Add(aKeys[index]);
+                aKeys.RemoveAt(index);
             }
             bKeys.Sort();
             a = new DataTable();
