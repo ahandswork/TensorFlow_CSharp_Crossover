@@ -91,16 +91,15 @@ namespace NeuralNetPractice
                 var dateColumn = databank.DataTableCollection[0]["Date"];
                 foreach (var t in databank.DataTableCollection)
                 {
-                    t.RemoveColumn("High");
-                    t.RemoveColumn("Low");
+                    //t.RemoveColumn("High");
+                    //t.RemoveColumn("Low");
                     t.RemoveColumn("Volume");
                     t.RemoveColumn("Date");
                 }
                 DataTable table = databank.ToDataTable();
                 for (int i = 0; i < table.ColumnCount; i++)
                     Console.WriteLine("Name: {0}, Starting Index: {1}, Ending Index: {2}", table.Columns[i].Name, table.Columns[i].FirstDay, table.Columns[i].LastDay);
-                table = table.Interlace(2,true);
-                var latestDate = table[0].LastDay;
+                //table = table.Interlace(2,true);
                 //table.AddColumn(dateColumn);
                 //Console.WriteLine("LastDate: " + table["Date"][table["Date"].Length - 1]);
                 table = table.Synchronize();
@@ -118,7 +117,7 @@ namespace NeuralNetPractice
                 table.RemoveColumn("label");
                 const int RANDOM_SEED = 165113;
                 table = table.Select(label.FirstDay, label.LastDay);
-
+                var latestDate = table[0].LastDay;
                 table.Select(latestDate, latestDate).Save(POST_PROCESS_SAVE_LOCATION + "latest.csv");
 
                 table.Splice(out DataTable trainingSet, out DataTable testingSet, 0.8, new Random(RANDOM_SEED));

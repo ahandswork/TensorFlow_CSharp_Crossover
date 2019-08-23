@@ -59,10 +59,6 @@ model = build_model()
 #inspecting the model
 model.summary()
 
-example_batch = trainingSet[:10]
-example_result = model.predict(example_batch)
-example_result
-
 #training the model
 # Display training progress by printing a single dot for each completed epoch
 class PrintDot(keras.callbacks.Callback):
