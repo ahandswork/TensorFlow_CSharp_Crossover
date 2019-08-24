@@ -20,15 +20,21 @@ testingLabelSet = pd.read_csv("PostProcessData/testingLabelSet.csv")
 currentModel = keras.models.load_model(MODEL_SAVE_LOCATION)
 
 predictions = currentModel.predict(testingSet)
-mape = 0
 mae = 0
 mse = 0
-for i in range(len(predictions)):
-    mse += numpy.square(testingLabelSet.iloc[i][0] - predictions[i])
-    mae += numpy.abs(testingLabelSet.iloc[i][0] - predictions[i])
-    mape += numpy.abs((1 - predictions[i]/testingLabelSet.iloc[i][0])[0])
-mape /= len(predictions)
-numpy.std()
-print("mean ABS error: ",mae * 100)
-print("mean Squared error: ",mse * 100)
-print("mean ABS percentage error: ",mape * 100)
+se = 0
+length = len(predictions)
+
+print("Predicted | Actual")
+for i in range(100):
+    print(predictions[i][0]," | ", testingLabelSet.iloc[i][0])
+for i in range(length):
+    mse += numpy.square(testingLabelSet.iloc[i][0] - predictions[i])[0]
+    mae += numpy.abs(testingLabelSet.iloc[i][0] - predictions[i])[0]
+    se += (numpy.abs(testingLabelSet.iloc[i][0] - numpy.sign(predictions[i]))/2)[0]
+mae /= length
+mse /= length
+se /= length
+print("mean ABS error: ",mae)
+print("mean Squared error: ",mse)
+print("mean sign error: ",se)

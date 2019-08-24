@@ -106,8 +106,8 @@ namespace NeuralNetPractice
                 table.AddColumn((string[] strInput, DateTime dateTime) => dateTime.DayOfYear.ToString(), new string[0], "DayOfYear");
                 var label = table["TXN.Close"].BuildDifferentialLabel((string current, string future) =>
                 {
-                    return future;
-                //return ((Math.Sign(double.Parse(future) - double.Parse(current)) + 1) / 2).ToString();
+                    //return future;
+                    return (Math.Sign(double.Parse(future) - double.Parse(current))).ToString();
                 }, 1);
                 label.Name = "label";
                 table.AddColumn(label);
@@ -143,7 +143,9 @@ namespace NeuralNetPractice
                     Console.WriteLine(NeuralNetwork.Train(GetInteger(0,1000*1000*1000)));
                     break;
                 case 1:
-                    Console.WriteLine(NeuralNetwork.Test());
+                    var lines = NeuralNetwork.Test();
+                    for (int i = lines.Count - 103; i < lines.Count; i++)
+                        Console.WriteLine(lines[i]);
                     break;
                 case 2:
                     Console.WriteLine(NeuralNetwork.PredictFuture());

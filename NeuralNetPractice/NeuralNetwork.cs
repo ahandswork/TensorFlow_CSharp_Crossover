@@ -11,7 +11,7 @@ namespace NeuralNetPractice
     class NeuralNetwork
     {
         public static List<string> Train(int epochs) => RunCMD_MultiLineOutput("\"networkTrainer.py\"", epochs.ToString());
-        public static string Test() => RunCMD_SingleOutput("\"networkTester.py\"", "", false);
+        public static List<string> Test() => RunCMD_MultiLineOutput("\"networkTester.py\"", "", false);
         public static string PredictFuture() => RunCMD_SingleOutput("\"networkPredict.py\"", "", false);
         static string RunCMD_SingleOutput(string cmd, string args, bool printOutputToConsole = true)
         {
