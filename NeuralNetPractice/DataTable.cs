@@ -180,8 +180,16 @@ namespace NeuralNetPractice
             }
             foreach (var column in Columns)
                 newTable.AddColumn(new DataColumn(column.Name));
+            DateTime startTime = DateTime.Now;
+            short k = 0;
             foreach (var day in Columns[0].Keys)
             {
+                if (k % 500 == 0)
+                {
+                    var now = (DateTime.Now - startTime).TotalSeconds;
+                    int timeRemaining = (int)Math.Round(now * Columns[0].Length / k - now);//in seconds
+                    Console.WriteLine("Syncronize: Estimated time remaining is {0} minutes and {1} seconds. ", timeRemaining / 60, timeRemaining);
+                }
                 bool rowComplete = true;
                 for (int j = 0; j < ColumnCount; j++)
                     if (!Columns[j].Keys.Contains(day))
@@ -192,7 +200,7 @@ namespace NeuralNetPractice
                 if (rowComplete)
                     for (int i = 0; i < ColumnCount; i++)
                         newTable[i].Add(day,Columns[i][day]);
-                        
+                k++;
             }
             newTable.DebugVerifySynced();
             return newTable;

@@ -110,14 +110,21 @@ namespace NeuralNetPractice
         }
         public DataColumn ShiftDays(int days, bool skipWeekends)
         {
+            int totalAdd = days / 5;
+            if (skipWeekends)
+                days %= 5;
             DataColumn dataColumn = new DataColumn(Name, new Dictionary<DateTime, string>());
             if (skipWeekends)
             {
                 foreach (var value in Content)
                 {
-                    var newDay = value.Key.AddDays(days);
+                    //var newDay = value.Key.AddDays(days);
+                    DateTime newDay = value.Key;
+                    newDay = newDay.AddDays(totalAdd);
                     if (newDay.DayOfWeek == DayOfWeek.Saturday || newDay.DayOfWeek == DayOfWeek.Sunday)
-                        newDay.AddDays(2);
+                    {
+                        newDay = newDay.AddDays(2);
+                    }
                     dataColumn.Content.Add(newDay, value.Value);
                 }
             }

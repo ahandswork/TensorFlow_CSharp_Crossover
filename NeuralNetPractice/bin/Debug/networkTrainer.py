@@ -47,9 +47,9 @@ def build_model():
     layers.Dense(1)
   ])
 
-  optimizer = tf.keras.optimizers.RMSprop(0.0001,0.9,0.001)
+  optimizer = tf.keras.optimizers.RMSprop(0.001,0.9,0.01)
 
-  model.compile(loss='mean_squared_error',
+  model.compile(loss='mean_absolute_error',
                 optimizer=optimizer,
                 metrics=['mean_absolute_error', 'mean_squared_error'])
   return model
