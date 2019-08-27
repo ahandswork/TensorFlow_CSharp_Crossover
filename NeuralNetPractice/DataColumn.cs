@@ -52,6 +52,14 @@ namespace NeuralNetPractice
                     Content.Add(time, value);
             }
         }
+        public SyncronizedDataTable ToSyncronizedDataTable()
+        {
+            string[,] data = new string[1, Length];
+            var values = Content.Values.ToArray();
+            for (int i = 0; i < Length; i++)
+                data[0, i] = values[i];
+            return new SyncronizedDataTable(Keys, new string[] { Name }, data);
+        }
         public DateTime[] Keys => Content.Keys.ToArray();
         public DataColumn Select(DateTime startDate, DateTime endDate)
         {
@@ -110,9 +118,8 @@ namespace NeuralNetPractice
         }
         public DataColumn ShiftDays(int days, bool skipWeekends)
         {
-            int totalAdd = days / 5;
             if (skipWeekends)
-                days %= 5;
+                days = days / 5 * 5 + days % 5;
             DataColumn dataColumn = new DataColumn(Name, new Dictionary<DateTime, string>());
             if (skipWeekends)
             {
@@ -120,10 +127,14 @@ namespace NeuralNetPractice
                 {
                     //var newDay = value.Key.AddDays(days);
                     DateTime newDay = value.Key;
-                    newDay = newDay.AddDays(totalAdd);
+                    newDay = newDay.AddDays(days);
                     if (newDay.DayOfWeek == DayOfWeek.Saturday || newDay.DayOfWeek == DayOfWeek.Sunday)
                     {
                         newDay = newDay.AddDays(2);
+                    }
+                    while (dataColumn.Content.Keys.Contains(newDay))
+                    {
+                        newDay = newDay.AddDays(1);
                     }
                     dataColumn.Content.Add(newDay, value.Value);
                 }
@@ -138,7 +149,6 @@ namespace NeuralNetPractice
         //extrapolate
         public DataColumn BuildDifferentialLabel(Func<string, string, string> f, int recordSeperation)
         {
-            recordSeperation *= -1;
             DataColumn d = new DataColumn();
             d.Content = new Dictionary<DateTime, string>(Length - recordSeperation);
             d.Name = "Delta-" + Name;

@@ -84,24 +84,6 @@ namespace NeuralNetPractice
         //        dt.Columns.Add(new DataColumn(names[i], data[i]));
         //    return dt;
         //}
-        public static void Save(string path, DataTable set) => set.Save(path);
-        public void Save(string path)
-        {
-            DebugVerifySynced();
-            string[] lines = new string[Columns[0].Length + 1];
-            for (int i = 0; i < ColumnCount; i++)
-            {
-                lines[0] += ',' + Columns[i].Name;
-                for (int j = 1; j < lines.Length; j++)
-                {
-                    lines[j] += ',' + Columns[i][j - 1];
-                }
-            }
-            for (int i = 0; i < lines.Length; i++)
-                lines[i] = lines[i].Substring(1);
-            File.WriteAllLines(path, lines);
-            Console.WriteLine("Saving {0}, total lines: {1}", path, lines.Length);
-        }
         public static DataTable Merge(DataTable a, DataTable b) => Merge(a, b, a.TableName == b.TableName ? a.TableName : "Merge(" + a.TableName + ", "+ b.TableName + ")");
         public static DataTable Merge(DataTable a, DataTable b, string mergedTableName)
         {
@@ -142,7 +124,7 @@ namespace NeuralNetPractice
         {
             DataTable dataTable = new DataTable();
             foreach (var column in Columns)
-                for (int i = 0; i <= multiplier; i++) {
+                for (int i = 0; i < multiplier; i++) {
                     var dupe = column.ShiftDays(i, skipWeekends);
                     if(i != 0)
                         dupe.Name += i.ToString();
@@ -166,9 +148,8 @@ namespace NeuralNetPractice
             foreach (DataColumn column in Columns)
                 column.Augment(f);
         }
-        public DataTable Synchronize()
+        public SyncronizedDataTable Synchronize()
         {
-            DataTable newTable = new DataTable();
             DateTime start = Columns[0].FirstDay;
             DateTime end = Columns[0].LastDay;
             for(int i = 1; i < ColumnCount; i++)
@@ -178,8 +159,10 @@ namespace NeuralNetPractice
                 if (Columns[i].LastDay < end) 
                     end = Columns[i].LastDay;
             }
-            foreach (var column in Columns)
-                newTable.AddColumn(new DataColumn(column.Name));
+            Dictionary<DateTime, List<string>> data = new Dictionary<DateTime, List<string>>(Columns[0].Length);
+
+            foreach (var date in Columns[0].Keys)
+                data.Add(date, new List<string>(ColumnCount));
             DateTime startTime = DateTime.Now;
             short k = 0;
             foreach (var day in Columns[0].Keys)
@@ -188,35 +171,26 @@ namespace NeuralNetPractice
                 {
                     var now = (DateTime.Now - startTime).TotalSeconds;
                     int timeRemaining = (int)Math.Round(now * Columns[0].Length / k - now);//in seconds
-                    Console.WriteLine("Syncronize: Estimated time remaining is {0} minutes and {1} seconds. ", timeRemaining / 60, timeRemaining);
+                    Console.WriteLine("Syncronize: Estimated time remaining is {0} minutes and {1} seconds. ", timeRemaining / 60, timeRemaining % 60);
                 }
-                bool rowComplete = true;
-                for (int j = 0; j < ColumnCount; j++)
-                    if (!Columns[j].Keys.Contains(day))
+                k++;
+
+                foreach(var column in Columns)
+                {
+                    if (column.Keys.Contains(day))
+                        data[day].Add(column[day]);
+                    else
                     {
-                        rowComplete = false;
+                        data.Remove(day);
                         break;
                     }
-                if (rowComplete)
-                    for (int i = 0; i < ColumnCount; i++)
-                        newTable[i].Add(day,Columns[i][day]);
-                k++;
+                }
             }
-            newTable.DebugVerifySynced();
-            return newTable;
-        }
-        void DebugVerifySynced()
-        {
-            if (Program.DEBUG)
-            {
-                foreach (var column in Columns)
-                    if (column.Length != Columns[0].Length)
-                        throw new Exception("Error DataTable not synced becuase column lengths are inconsistant.");
-                foreach(var key in Columns[0].Keys)
-                    for (int j = 1; j < Columns.Count; j++)
-                        if (!Columns[j].Keys.Contains(key))
-                            throw new Exception("Error mismatched column DateTimes.");
-            }
+            string[] columnNames = new string[ColumnCount];
+            for (int i = 0; i < ColumnCount; i++)
+                columnNames[i] = Columns[i].Name;
+            Console.WriteLine("Syncronization Complete.");
+            return new SyncronizedDataTable(columnNames, data);
         }
         public DataTable Select(DateTime startDate, DateTime endDate)
         {

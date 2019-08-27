@@ -99,34 +99,31 @@ namespace NeuralNetPractice
                 DataTable table = databank.ToDataTable();
                 for (int i = 0; i < table.ColumnCount; i++)
                     Console.WriteLine("Name: {0}, Starting Index: {1}, Ending Index: {2}", table.Columns[i].Name, table.Columns[i].FirstDay, table.Columns[i].LastDay);
-                table = table.Interlace(10,true);
+                table = table.Interlace(2,true);
                 //table.AddColumn(dateColumn);
                 //Console.WriteLine("LastDate: " + table["Date"][table["Date"].Length - 1]);
-                table = table.Synchronize();
+                //table = table.Synchronize();
                 table.AddColumn((string[] strInput, DateTime dateTime) => dateTime.DayOfYear.ToString(), new string[0], "DayOfYear");
                 var label = table["TXN.Close"].BuildDifferentialLabel((string current, string future) =>
                 {
-                    //return future;
-                    return (Math.Sign(double.Parse(future) - double.Parse(current))).ToString();
+                    return future;
+                    //return (Math.Sign(double.Parse(future) - double.Parse(current))).ToString();
                 }, 1);
                 label.Name = "label";
                 table.AddColumn(label);
-                table = table.Synchronize();
+                var syncedTable = table.Synchronize();
 
-                label = table["label"];
-                table.RemoveColumn("label");
+                label = syncedTable["label"];
+                syncedTable.RemoveColumn("label");
                 const int RANDOM_SEED = 165113;
-                table = table.Select(label.FirstDay, label.LastDay);
-                var latestDate = table[0].LastDay;
-                table.Select(latestDate, latestDate).Save(POST_PROCESS_SAVE_LOCATION + "latest.csv");
+                var latestDate = syncedTable.LastDay;
+                syncedTable.Select(latestDate, latestDate).Save(POST_PROCESS_SAVE_LOCATION + "latest.csv");
 
-                table.Splice(out DataTable trainingSet, out DataTable testingSet, 0.8, new Random(RANDOM_SEED));
-
-                DataTable labelTable = new DataTable();
-                labelTable.Columns.Add(label);
+                syncedTable.Splice(out SyncronizedDataTable trainingSet, out SyncronizedDataTable testingSet, 0.8, new Random(RANDOM_SEED));
+                SyncronizedDataTable labelTable = label.ToSyncronizedDataTable();
                 //labelTable.AddColumn((string[] str, DateTime dt) => dt.ToString(), new string[0], "DateTime");
 
-                labelTable.Splice(out DataTable trainingLabelSet, out DataTable testingLabelSet, 0.8, new Random(RANDOM_SEED));
+                labelTable.Splice(out SyncronizedDataTable trainingLabelSet, out SyncronizedDataTable testingLabelSet, 0.8, new Random(RANDOM_SEED));
 
                 Console.WriteLine("Label Index: {0}, Ending Index: {1}", label.FirstDay, label.LastDay);
 

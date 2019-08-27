@@ -49,7 +49,7 @@ def build_model():
 
   optimizer = tf.keras.optimizers.RMSprop(0.001,0.9,0.01)
 
-  model.compile(loss='mean_absolute_error',
+  model.compile(loss='mean_squared_error',
                 optimizer=optimizer,
                 metrics=['mean_absolute_error', 'mean_squared_error'])
   return model
